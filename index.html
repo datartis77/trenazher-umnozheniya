@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тренажёр умножения</title>
+  <style>
+    :root { --blue:#2867c8; --green:#197a46; --red:#b23030; --ink:#172033; --muted:#697386; --paper:#fff; --bg:#f2f6fc; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); }
+    main { width:min(920px,calc(100% - 32px)); margin:36px auto; }
+    h1 { margin:0 0 8px; font-size:clamp(27px,4vw,39px); }
+    h2 { margin:0 0 16px; font-size:22px; }
+    .lead { color:var(--muted); margin:0 0 24px; }
+    .card { background:var(--paper); border-radius:16px; padding:28px; box-shadow:0 8px 30px #1a42721a; margin-bottom:22px; }
+    .hidden { display:none !important; }
+    button { border:0; border-radius:9px; background:var(--blue); color:#fff; padding:12px 18px; font:inherit; font-weight:650; cursor:pointer; }
+    button:hover { filter:brightness(.94); } .secondary { background:#e9eef7; color:var(--ink); } .danger { background:var(--red); }
+    .problem { font-size:clamp(40px,8vw,62px); font-weight:750; text-align:center; padding:12px 0 4px; }
+    .status { display:flex; justify-content:space-between; gap:14px; color:var(--muted); font-weight:600; }
+    .bar { height:9px; background:#e7edf7; border-radius:50px; overflow:hidden; margin:15px 0 26px; }
+    .bar > div { height:100%; width:0; background:var(--blue); transition:width .25s; }
+    form { display:flex; justify-content:center; gap:10px; margin-top:24px; }
+    input { width:120px; border:2px solid #cbd6e5; border-radius:9px; padding:10px; font:inherit; font-size:22px; text-align:center; }
+    input:focus { outline:none; border-color:var(--blue); }
+    .message { min-height:25px; text-align:center; margin:14px 0 0; font-weight:650; } .ok { color:var(--green); } .bad { color:var(--red); }.answer-flash { display:inline-grid; place-items:center; width:46px; height:46px; margin-top:-2px; border-radius:50%; font-size:30px; font-weight:900; animation:answerPop .3s ease-out both; }.answer-flash.ok { background:#dff5e8; color:#08723d; }.answer-flash.bad { background:#ffe2e4; color:#b22632; } @keyframes answerPop { 0%{transform:scale(.25);opacity:0} 18%{transform:scale(1.2);opacity:1} 72%{transform:scale(1);opacity:1} 100%{transform:scale(.8);opacity:0} }
+    #attemptDetails { border:1px solid #dbe5f2; border-radius:13px; overflow:auto; box-shadow:0 5px 18px #264c7b0d; }.answer-mark { display:inline-grid; place-items:center; width:27px; height:27px; border-radius:50%; font-size:17px; font-weight:900; }.answer-mark.yes { color:#08723d; background:#dff5e8; }.answer-mark.no { color:#b22632; background:#ffe2e4; }
+    table { width:100%; border-collapse:separate; border-spacing:0; font-size:15px; min-width:650px; } th,td { padding:12px 13px; border-bottom:1px solid #e7edf5; text-align:center; } th { color:#fff; background:linear-gradient(110deg,#245fb8,#397fd8); font-size:12px; letter-spacing:.025em; text-transform:uppercase; white-space:nowrap; } th:first-child { border-radius:12px 0 0 0; } th:last-child { border-radius:0 12px 0 0; } tbody tr:nth-child(even) { background:#f6f9fe; } tbody tr:hover { background:#eaf3ff; } tbody tr:last-child td { border-bottom:0; } td:first-child { color:#58718f; font-weight:700; } .right { text-align:center; } td:nth-child(3) { font-weight:750; color:#1a519b; } td:nth-child(4) { font-weight:650; }
+    .summary { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:18px 0 24px; } .metric { background:#f4f7fb; border-radius:10px; padding:14px; } .metric span { display:block; color:var(--muted); font-size:13px; } .metric strong { display:block; font-size:23px; margin-top:3px; }
+    .progress { padding:13px 15px; background:#eef7f1; color:#16643a; border-radius:10px; margin-bottom:18px; } .regress { background:#fff1f0; color:#9d2929; } .neutral { background:#f2f4f7; color:#566171; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; } .empty { color:var(--muted); text-align:center; padding:20px; }
+    .history-subtitle { margin:26px 0 8px; font-size:19px; } .history-subtitle:first-child { margin-top:0; }.history-note { margin:0 0 14px; color:var(--muted); font-size:14px; }.daily-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:14px 0; }.daily-metrics div { padding:13px; border:1px solid #dce7f5; border-radius:11px; background:linear-gradient(135deg,#f6faff,#edf5ff); text-align:center; }.daily-metrics span { display:block; color:var(--muted); font-size:13px; }.daily-metrics strong { display:block; color:#18549f; font-size:21px; margin-top:3px; }.history-scroll { border:1px solid #dbe5f2; border-radius:13px; overflow:auto; box-shadow:0 5px 18px #264c7b0d; }
+    .celebration { position:relative; overflow:hidden; margin:0 0 22px; padding:18px 20px 14px; min-height:196px; border-radius:15px; background:radial-gradient(circle at 50% 0,#fff6ad 0, #ffdf65 37%,#f2ae25 100%); text-align:center; box-shadow:inset 0 0 0 3px #fff7cc, 0 9px 22px #b06b172b; }.celebration.support { background:radial-gradient(circle at 50% 0,#ecf8ff 0,#bce3f6 45%,#78add4 100%); box-shadow:inset 0 0 0 3px #eaf8ff,0 9px 22px #34729d2b; }.celebration.support h3 { color:#144f76; }
+    .celebration h3 { margin:0; color:#804007; font-size:19px; position:relative; z-index:1; }.character { position:relative; z-index:1; width:165px; margin:0 auto; animation:characterJump 1.35s ease-in-out infinite; transform-origin:50% 100%; }.character-face { font-size:78px; height:87px; line-height:88px; filter:drop-shadow(0 3px 1px #8c541644); }.wolf-ear { display:inline-block; position:relative; top:-68px; margin:0 -7px; font-size:25px; transform:rotate(-18deg); }.wolf-ear:last-child { transform:rotate(18deg); }.placard { position:relative; margin:-20px auto 0; width:165px; padding:8px 6px; border:3px solid #9d2c1d; border-radius:7px; background:#fffbea; color:#9d2c1d; font-family:Impact,"Arial Black",sans-serif; font-size:17px; letter-spacing:.01em; line-height:1.05; transform:rotate(-4deg); box-shadow:3px 4px 0 #9d2c1d; }.support .placard { border-color:#1c5e8a;color:#1c5e8a;box-shadow:3px 4px 0 #1c5e8a; }.confetti i { position:absolute; width:8px; height:13px; background:#ee5c4d; animation:fall 2.6s linear infinite; }.confetti i:nth-child(2n){background:#367bd0;animation-delay:.4s}.confetti i:nth-child(3n){background:#2a9b63;animation-delay:1s}.confetti i:nth-child(4n){background:#fff;animation-delay:1.4s}.confetti i:nth-child(1){left:7%;top:-10px}.confetti i:nth-child(2){left:19%;top:-30px}.confetti i:nth-child(3){left:31%;top:-18px}.confetti i:nth-child(4){left:47%;top:-39px}.confetti i:nth-child(5){left:65%;top:-8px}.confetti i:nth-child(6){left:79%;top:-25px}.confetti i:nth-child(7){left:91%;top:-38px}.confetti i:nth-child(8){left:39%;top:-5px}.confetti i:nth-child(9){left:56%;top:-28px}@keyframes characterJump{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}@keyframes fall{to{transform:translateY(220px) rotate(340deg);opacity:.15}}
+    @media(max-width:560px) { main{width:min(100% - 20px,920px);margin:16px auto}.card{padding:20px 15px}.summary,.daily-metrics{grid-template-columns:1fr} table{font-size:13px} th,td{padding:8px 4px} }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Тренажёр умножения</h1>
+  <p class="lead">20 последовательных примеров на умножение однозначных чисел.</p>
+
+  <section id="welcome" class="card">
+    <h2>Готовы к попытке?</h2>
+    <p>Для каждого примера будет записано отдельное время. После завершения вы увидите результат и сравнение с прошлой попыткой.</p>
+    <button id="start">Начать попытку №1</button>
+  </section>
+
+  <section id="quiz" class="card hidden">
+    <div class="status"><span id="counter">Пример 1 из 20</span><span id="clock">00:00</span></div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div id="problem" class="problem">3 × 7</div>
+    <form id="answerForm" autocomplete="off">
+      <input id="answer" type="number" inputmode="numeric" aria-label="Ваш ответ" autofocus>
+      <button>Ответить</button>
+    </form>
+    <div id="message" class="message"></div>
+  </section>
+
+  <section id="result" class="card hidden">
+    <h2 id="resultTitle">Попытка завершена</h2>
+    <div id="comparison"></div>
+    <div class="summary"><div class="metric"><span>Общее время</span><strong id="totalTime"></strong></div><div class="metric"><span>Правильных ответов</span><strong id="correctFirst"></strong></div><div class="metric"><span>Среднее на пример</span><strong id="averageTime"></strong></div></div>
+    <h2>Время решения примеров</h2>
+    <div id="attemptDetails"></div>
+    <div class="actions"><button id="nextAttempt">Начать новую попытку</button><button id="showHistory" class="secondary">Все попытки</button></div>
+  </section>
+
+  <section id="history" class="card hidden">
+    <h2>Сравнительная таблица попыток</h2>
+    <div id="historyTable"></div>
+    <div class="actions"><button id="backToStart" class="secondary">Назад</button><button id="clearHistory" class="danger">Очистить историю</button></div>
+  </section>
+</main>
+<script>
+(() => {
+  const COUNT = 20, KEY = 'multiplicationTrainerAttemptsV1';
+  const $ = id => document.getElementById(id);
+  let problems = [], current = 0, startedAt = 0, problemStartedAt = 0, firstTry = true, attempt = null, timer = null, advancing = false;
+  const saved = () => JSON.parse(localStorage.getItem(KEY) || '[]');
+  const save = data => localStorage.setItem(KEY, JSON.stringify(data));
+  const fmt = seconds => { seconds = Math.max(0, seconds); const m=Math.floor(seconds/60), s=Math.floor(seconds%60); return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; };
+  const fmtShort = seconds => seconds < 60 ? `${seconds.toFixed(1)} с` : fmt(seconds);
+  const localDay = (date = new Date()) => { const offset = date.getTimezoneOffset() * 60000; return new Date(date - offset).toISOString().slice(0,10); };
+  const displayDay = day => new Date(`${day}T12:00:00`).toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
+  const accuracy = item => Math.round((item.correctFirst || 0) / COUNT * 100);
+  const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  function generate() { return Array.from({length:COUNT}, () => { let a=1+Math.floor(Math.random()*9), b=1+Math.floor(Math.random()*9); return {a,b,answer:a*b}; }); }
+  function show(id) { ['welcome','quiz','result','history'].forEach(x => $(x).classList.toggle('hidden',x!==id)); }
+  function start() {
+    problems=generate(); current=0; startedAt=Date.now(); const now = new Date(); attempt={date:now.toLocaleString('ru-RU'), day:localDay(now), items:[], total:0, correctFirst:0};
+    show('quiz'); renderProblem(); clearInterval(timer); timer=setInterval(() => $('clock').textContent=fmt((Date.now()-startedAt)/1000), 250);
+  }
+  function renderProblem() {
+    const p=problems[current]; advancing=false; firstTry=true; p.userAnswers=[]; problemStartedAt=Date.now(); $('counter').textContent=`Пример ${current+1} из ${COUNT}`; $('barFill').style.width=`${current/COUNT*100}%`; $('problem').textContent=`${p.a} × ${p.b}`; $('answer').value=''; $('answer').disabled=false; $('answerForm').querySelector('button').disabled=false; $('message').textContent=''; $('message').className='message'; $('answer').focus();
+  }
+  $('answerForm').addEventListener('submit', e => {
+    e.preventDefault(); const input=$('answer'), value=Number(input.value), p=problems[current]; if (advancing || input.value.trim()==='') return; advancing=true;
+    p.userAnswers.push(value);
+    const isCorrect = value === p.answer;
+    const seconds=(Date.now()-problemStartedAt)/1000; attempt.items.push({example:`${p.a} × ${p.b}`, correctAnswer:p.answer, userAnswers:p.userAnswers, seconds, firstTry:isCorrect}); if(isCorrect) attempt.correctFirst++; input.disabled=true; $('answerForm').querySelector('button').disabled=true; $('message').innerHTML=`<span class="answer-flash ${isCorrect?'ok':'bad'}">${isCorrect?'✓':'✕'}</span>`; $('message').className='message';
+    setTimeout(() => { current++; if(current===COUNT) finish(); else renderProblem(); }, 300);
+  });
+  function finish() {
+    clearInterval(timer); attempt.total=(Date.now()-startedAt)/1000; const list=saved(); list.push(attempt); save(list); $('barFill').style.width='100%'; showResult(list);
+  }
+  function deltaMessage(previous) {
+    if (!previous) return '<div class="progress neutral">Это ваша первая попытка. Следующая покажет прогресс.</div>';
+    const delta=attempt.total-previous.total, cdelta=attempt.correctFirst-previous.correctFirst;
+    if (delta < -0.05) return `<div class="progress">Прогресс: вы быстрее на ${fmtShort(-delta)}${cdelta ? `; правильных ответов: ${cdelta>0?'+':''}${cdelta}` : ''}.</div>`;
+    if (delta > 0.05) return `<div class="progress regress">Регресс по времени: медленнее на ${fmtShort(delta)}${cdelta ? `; правильных ответов: ${cdelta>0?'+':''}${cdelta}` : ''}. Попробуйте ещё раз!</div>`;
+    return '<div class="progress neutral">Результат по времени почти не изменился.</div>';
+  }
+  function characterBlock(errors) {
+    let animal='🐺', poster='Во дает!<br>Молодец!', heading='Все ответы верны с первой попытки!', wolf=true;
+    if (errors > 10) { animal='🐏'; poster='Пойдем травку<br>жевать!'; heading=`Ошибок: ${errors}. Отдохнём и попробуем снова!`; wolf=false; }
+    else if (errors > 3) { animal='🐻'; poster='Давай, ты можешь<br>лучше!'; heading=`Ошибок: ${errors}. Следующая попытка будет сильнее!`; wolf=false; }
+    else if (errors > 0) { animal='🐰'; poster='Не расстраивайся,<br>ты молодец!'; heading=`Ошибок: ${errors}. Ты уже хорошо потренировался!`; wolf=false; }
+    const face=wolf ? `<span class="wolf-ear">▲</span>${animal}<span class="wolf-ear">▲</span>` : animal;
+    return `<div class="celebration ${errors ? 'support' : ''}"><div class="confetti"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><h3>${heading}</h3><div class="character"><div class="character-face">${face}</div><div class="placard">${poster}</div></div></div>`;
+  }
+  function showResult(list) {
+    const previous=list.length>1 ? list[list.length-2] : null, errors=attempt.items.reduce((sum,x)=>sum+(x.userAnswers||[]).filter(answer=>answer!==x.correctAnswer).length,0); $('resultTitle').textContent=`Попытка №${list.length} завершена`; $('comparison').innerHTML=characterBlock(errors) + deltaMessage(previous); $('totalTime').textContent=fmt(attempt.total); $('correctFirst').textContent=`${attempt.correctFirst} / ${COUNT}`; $('averageTime').textContent=fmtShort(attempt.total/COUNT);
+    $('attemptDetails').innerHTML=`<table><thead><tr><th>№</th><th>Пример</th><th class="right">Правильный ответ</th><th>Ваш ответ</th><th class="right">Время</th><th class="right">Верно</th></tr></thead><tbody>${attempt.items.map((x,i)=>`<tr><td>${i+1}</td><td>${escape(x.example)}</td><td class="right">${x.correctAnswer ?? '—'}</td><td>${escape((x.userAnswers || []).join(' → ') || '—')}</td><td class="right">${fmtShort(x.seconds)}</td><td class="right"><span class="answer-mark ${x.firstTry?'yes':'no'}" aria-label="${x.firstTry?'Верно':'Неверно'}">${x.firstTry?'✓':'✕'}</span></td></tr>`).join('')}</tbody></table>`; show('result');
+  }
+  function renderHistory() {
+    const list=saved();
+    if (!list.length) { $('historyTable').innerHTML='<p class="empty">История пока пуста.</p>'; show('history'); return; }
+    const today=localDay();
+    const byDay={};
+    list.forEach((x,i) => { const day=x.day || (i === list.length-1 ? today : 'Ранние попытки'); (byDay[day] ||= []).push({...x, index:i}); });
+    const todayList=byDay[today] || [];
+    const stats=items => ({avg:items.reduce((sum,x)=>sum+x.total,0)/items.length, accuracy:Math.round(items.reduce((sum,x)=>sum+(x.correctFirst||0),0)/(items.length*COUNT)*100)});
+    const todayStats=todayList.length ? stats(todayList) : null;
+    const dailyRows=Object.entries(byDay).sort(([a],[b])=>b.localeCompare(a)).map(([day,items])=> { const s=stats(items); return `<tr><td>${day==='Ранние попытки'?day:displayDay(day)}</td><td>${items.length}</td><td>${fmtShort(s.avg)}</td><td>${s.accuracy}%</td></tr>`; }).join('');
+    const todayBlock=todayList.length ? `<h3 class="history-subtitle">Сегодня — ${displayDay(today)}</h3><div class="daily-metrics"><div><span>Попыток сегодня</span><strong>${todayList.length}</strong></div><div><span>Среднее время</span><strong>${fmtShort(todayStats.avg)}</strong></div><div><span>Общая точность</span><strong>${todayStats.accuracy}%</strong></div></div><div class="history-scroll"><table><thead><tr><th>Попытка</th><th>Время</th><th>Точность</th><th>Изменение времени</th></tr></thead><tbody>${todayList.map((x,j)=>{ const prev=todayList[j-1], d=prev ? x.total-prev.total : 0; const change=!prev?'—':d<-.05?`<span class="ok">быстрее ${fmtShort(-d)}</span>`:d>.05?`<span class="bad">медленнее ${fmtShort(d)}</span>`:'без изменений'; return `<tr><td>№${j+1}</td><td>${fmt(x.total)}</td><td>${accuracy(x)}%</td><td>${change}</td></tr>`; }).join('')}</tbody></table></div>` : `<p class="empty">Сегодня ещё нет завершённых попыток.</p>`;
+    $('historyTable').innerHTML=`${todayBlock}<h3 class="history-subtitle">Сравнение по дням</h3><p class="history-note">Среднее время и точность позволяют следить за прогрессом между днями.</p><div class="history-scroll"><table><thead><tr><th>День</th><th>Попыток</th><th>Среднее время</th><th>Общая точность</th></tr></thead><tbody>${dailyRows}</tbody></table></div>`;
+    show('history');
+  }
+  $('start').onclick=start; $('nextAttempt').onclick=start; $('showHistory').onclick=renderHistory; $('backToStart').onclick=()=>{ $('start').textContent=`Начать попытку №${saved().length+1}`; show('welcome');};
+  $('clearHistory').onclick=()=>{ if(confirm('Удалить все сохранённые попытки?')) { localStorage.removeItem(KEY); $('start').textContent='Начать попытку №1'; renderHistory(); } };
+  $('start').textContent=`Начать попытку №${saved().length+1}`;
+})();
+</script>
+</body>
+</html>
